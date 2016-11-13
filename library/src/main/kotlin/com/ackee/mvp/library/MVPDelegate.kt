@@ -8,7 +8,7 @@ import android.os.Bundle
  * @author David Bilik [david.bilik@ackee.cz]
  * @since 12/11/16
  **/
-class MVPDelegate<out P : Presenter<Any, DataState>>: PresenterView<P> {
+class MVPDelegate<out P : Presenter<Any>>: PresenterView<P> {
     override fun create(arguments: Bundle?) {
         throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
