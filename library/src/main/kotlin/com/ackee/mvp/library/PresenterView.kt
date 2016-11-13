@@ -8,6 +8,18 @@ import android.os.Bundle
  * @author David Bilik [david.bilik@ackee.cz]
  * @since 12/11/16
  **/
-interface PresenterView {
-    fun create(bundle: Bundle?)
+interface PresenterView<out P : Presenter<*, *>> {
+    fun create(arguments: Bundle?)
+
+    fun viewCreated(view: Any)
+
+    fun viewResumed(view: Any)
+
+    fun viewPaused(view: Any)
+
+    fun viewDestroyed(view: Any)
+
+    fun destroy(terminal: Boolean)
+
+    fun getPresenter(): P
 }
