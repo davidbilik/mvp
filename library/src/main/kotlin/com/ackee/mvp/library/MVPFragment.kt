@@ -11,10 +11,21 @@ import android.view.View
  * @author David Bilik [david.bilik@ackee.cz]
  * @since 12/11/16
  **/
-class MVPFragment<P : Presenter<Any, DataState>> : Fragment(), PresenterView<P> {
+class MVPFragment<out P : Presenter<*>> : Fragment(), PresenterView<P>, MVPView {
     companion object {
         val TAG: String = MVPFragment::class.java.name
     }
+
+
+    override fun saveState(state: Bundle) {
+        delegate.saveState(state)
+    }
+
+    override fun restoreState(state: Bundle) {
+        delegate.restoreState(state)
+    }
+
+    val delegate: MVPDelegate<P> = MVPDelegate(ReflectivePresenterCreator(ReflectivePresenterCreator.getClassFromAnnotation(::class.java)))
 
     override fun destroy(terminal: Boolean) {
         delegate.destroy(terminal)
@@ -22,31 +33,32 @@ class MVPFragment<P : Presenter<Any, DataState>> : Fragment(), PresenterView<P> 
 
     override fun getPresenter(): P = delegate.getPresenter()
 
-    val delegate: MVPDelegate<P> = MVPDelegate()
-
     override fun create(arguments: Bundle?) {
         delegate.create(arguments)
     }
 
-    override fun viewCreated(view: Any) {
+    override fun viewCreated(view: MVPView) {
         delegate.viewCreated(view)
     }
 
-    override fun viewResumed(view: Any) {
+    override fun viewResumed(view: MVPView) {
         delegate.viewResumed(view)
     }
 
-    override fun viewPaused(view: Any) {
+    override fun viewPaused(view: MVPView) {
         delegate.viewPaused(view)
     }
 
-    override fun viewDestroyed(view: Any) {
+    override fun viewDestroyed(view: MVPView) {
         delegate.viewDestroyed(view)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         create(arguments)
+        if (savedInstanceState != null) {
+            restoreState(savedInstanceState)
+        }
     }
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
@@ -80,6 +92,11 @@ class MVPFragment<P : Presenter<Any, DataState>> : Fragment(), PresenterView<P> 
             parent = parent.parentFragment
         }
         destroy(isRemoving || anyParentIsRemoving || activity.isFinishing)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        saveState(outState)
     }
 
 }

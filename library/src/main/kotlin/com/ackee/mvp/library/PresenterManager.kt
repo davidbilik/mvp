@@ -10,7 +10,7 @@ import java.util.*
  * Created by Georgiy Shur (georgiy.shur@ackee.cz) on 11/13/2016.
  */
 object PresenterManager {
-    var presenters : HashMap<String, Presenter<*>> = HashMap()
+    var presenters: HashMap<String, Presenter<*>> = HashMap()
 
     fun add(presenter: Presenter<*>): String {
         val id: String = presenter.javaClass.name + System.nanoTime()
@@ -18,8 +18,8 @@ object PresenterManager {
         return id
     }
 
-    fun get(id: String) {
-        presenters[id]
+    fun get(id: String): Presenter<*>? {
+        return presenters[id]
     }
 
     fun remove(id: String) {

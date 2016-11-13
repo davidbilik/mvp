@@ -9,7 +9,7 @@ import rx.subjects.BehaviorSubject
  * @author David Bilik [david.bilik@ackee.cz]
  * @since 12/11/16
  **/
-abstract class Presenter<V> {
+open class Presenter<V : MVPView> {
 
     var globalId: String = PresenterManager.add(this)
 

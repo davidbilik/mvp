@@ -9,7 +9,15 @@ import android.support.v7.app.AppCompatActivity
  * @author David Bilik [david.bilik@ackee.cz]
  * @since 12/11/16
  **/
-class MVPActivity<P : Presenter<Any, DataState>> : AppCompatActivity(), PresenterView<P> {
+class MVPActivity<out P : Presenter<*>> : AppCompatActivity(), PresenterView<P>, MVPView {
+    override fun saveState(state: Bundle) {
+        delegate.saveState(state)
+    }
+
+    override fun restoreState(state: Bundle) {
+        delegate.restoreState(state)
+    }
+
     companion object {
         val TAG: String = MVPFragment::class.java.name
     }
@@ -62,6 +70,16 @@ class MVPActivity<P : Presenter<Any, DataState>> : AppCompatActivity(), Presente
         super.onDestroy()
         viewDestroyed(this)
         destroy(isFinishing)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        saveState(outState)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        restoreState(savedInstanceState)
     }
 
 }

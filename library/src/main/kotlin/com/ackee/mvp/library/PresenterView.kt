@@ -8,18 +8,22 @@ import android.os.Bundle
  * @author David Bilik [david.bilik@ackee.cz]
  * @since 12/11/16
  **/
-interface PresenterView<out P : Presenter<*, *>> {
+interface PresenterView<out P : Presenter<*>> {
     fun create(arguments: Bundle?)
 
-    fun viewCreated(view: Any)
+    fun viewCreated(view: MVPView)
 
-    fun viewResumed(view: Any)
+    fun viewResumed(view: MVPView)
 
-    fun viewPaused(view: Any)
+    fun viewPaused(view: MVPView)
 
-    fun viewDestroyed(view: Any)
+    fun viewDestroyed(view: MVPView)
 
     fun destroy(terminal: Boolean)
 
     fun getPresenter(): P
+
+    fun saveState(state: Bundle)
+
+    fun restoreState(state: Bundle)
 }
