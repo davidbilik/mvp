@@ -9,14 +9,14 @@ import rx.subjects.BehaviorSubject
  * @author David Bilik [david.bilik@ackee.cz]
  * @since 12/11/16
  **/
-open class Presenter<V : MVPView> {
+abstract class Presenter<V> {
 
     var globalId: String = PresenterManager.add(this)
 
     var view: BehaviorSubject<V> = BehaviorSubject.create()
     var viewState: BehaviorSubject<ViewState> = BehaviorSubject.create()
 
-    fun create(bundle: Bundle) {
+    fun create(bundle: Bundle?) {
 
     }
 

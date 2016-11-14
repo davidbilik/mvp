@@ -13,9 +13,10 @@ class MVPDelegateTest {
     @Test
     @Throws(Exception::class)
     fun addition_isCorrect() {
-        class MyView : MVPView {}
-        class MyPresenter : Presenter<MyView>() {}
+        val f: ConcreteFragment = ConcreteFragment()
 
-        val delegate = MVPDelegate<MyPresenter>()
+        val delegate = MVPDelegate(f)
+
+        val presenter = delegate.getPresenter()
     }
 }

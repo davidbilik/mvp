@@ -11,13 +11,13 @@ import android.os.Bundle
 interface PresenterView<out P : Presenter<*>> {
     fun create(arguments: Bundle?)
 
-    fun viewCreated(view: MVPView)
+    fun viewCreated(view: Any)
 
-    fun viewResumed(view: MVPView)
+    fun viewResumed(view: Any)
 
-    fun viewPaused(view: MVPView)
+    fun viewPaused(view: Any)
 
-    fun viewDestroyed(view: MVPView)
+    fun viewDestroyed(view: Any)
 
     fun destroy(terminal: Boolean)
 

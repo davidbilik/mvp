@@ -8,59 +8,59 @@ import android.os.Bundle
  * @author David Bilik [david.bilik@ackee.cz]
  * @since 12/11/16
  **/
-class MVPDelegate<out P : Presenter<MVPView>>(val presenterCreator : PresenterCreator<P>) : PresenterView<P> {
+class MVPDelegate<Delegated : Any>(var delegated: Delegated) {
     companion object {
         val TAG: String = MVPDelegate::class.java.name
         const val ID_KEY: String = "presenter_id"
     }
 
     private var arguments: Bundle? = null
-    private var presenter: P? = null
+    private var presenter: Presenter<in Delegated>? = null
 
     private var restoredState: Bundle? = null
 
-    override fun saveState(state: Bundle) {
+    fun saveState(state: Bundle) {
 
     }
 
-    override fun restoreState(state: Bundle) {
+    fun restoreState(state: Bundle) {
         restoredState = state
     }
 
 
-    override fun create(arguments: Bundle?) {
+    fun create(arguments: Bundle?) {
         this.arguments = arguments
     }
 
-    override fun viewCreated(view: MVPView) {
-        getPresenter().viewCreated(view)
+    fun viewCreated() {
+        getPresenter().viewCreated(delegated)
     }
 
-    override fun viewResumed(view: MVPView) {
+    fun viewResumed() {
         throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun viewPaused(view: MVPView) {
+    fun viewPaused() {
         throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun viewDestroyed(view: MVPView) {
+    fun viewDestroyed() {
         throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun destroy(terminal: Boolean) {
+    fun destroy(terminal: Boolean) {
         if (terminal) {
             //TODO remove prsenter from manager
         }
     }
 
-    override fun getPresenter(): P {
+    fun getPresenter(): Presenter<in Delegated> {
         if (presenter == null && restoredState != null) {
-            presenter = PresenterManager.get(restoredState!!.getString(ID_KEY, null)) as P
+            presenter = PresenterManager.get(restoredState!!.getString(ID_KEY, null)) as Presenter<in Delegated>
         }
         if (presenter == null) {
-            presenter = presenterCreator.createPresenter()
-            presenter?.create(if (restoredState == null) arguments!! else restoredState!!)
+            presenter = createPresenter<Delegated, Presenter<Delegated>>(getClassFromAnnotation(delegated.javaClass.kotlin))
+            presenter?.create(if (restoredState == null) arguments else restoredState!!)
         }
         return presenter!!
     }

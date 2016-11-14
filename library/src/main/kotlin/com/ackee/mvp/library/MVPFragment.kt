@@ -11,74 +11,39 @@ import android.view.View
  * @author David Bilik [david.bilik@ackee.cz]
  * @since 12/11/16
  **/
-class MVPFragment<out P : Presenter<*>> : Fragment(), PresenterView<P>, MVPView {
+open class MVPFragment: Fragment(), MVPView {
     companion object {
         val TAG: String = MVPFragment::class.java.name
     }
 
-
-    override fun saveState(state: Bundle) {
-        delegate.saveState(state)
-    }
-
-    override fun restoreState(state: Bundle) {
-        delegate.restoreState(state)
-    }
-
-    val delegate: MVPDelegate<P> = MVPDelegate(ReflectivePresenterCreator(ReflectivePresenterCreator.getClassFromAnnotation(::class.java)))
-
-    override fun destroy(terminal: Boolean) {
-        delegate.destroy(terminal)
-    }
-
-    override fun getPresenter(): P = delegate.getPresenter()
-
-    override fun create(arguments: Bundle?) {
-        delegate.create(arguments)
-    }
-
-    override fun viewCreated(view: MVPView) {
-        delegate.viewCreated(view)
-    }
-
-    override fun viewResumed(view: MVPView) {
-        delegate.viewResumed(view)
-    }
-
-    override fun viewPaused(view: MVPView) {
-        delegate.viewPaused(view)
-    }
-
-    override fun viewDestroyed(view: MVPView) {
-        delegate.viewDestroyed(view)
-    }
+    val delegate: MVPDelegate<out MVPView> = MVPDelegate(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        create(arguments)
+        delegate.create(arguments)
         if (savedInstanceState != null) {
-            restoreState(savedInstanceState)
+            delegate.restoreState(savedInstanceState)
         }
     }
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewCreated(this)
+        delegate.viewCreated()
     }
 
     override fun onResume() {
         super.onResume()
-        viewResumed(this)
+        delegate.viewResumed()
     }
 
     override fun onPause() {
         super.onPause()
-        viewPaused(this)
+        delegate.viewPaused()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        viewDestroyed(this)
+        delegate.viewDestroyed()
     }
 
     override fun onDestroy() {
@@ -91,12 +56,12 @@ class MVPFragment<out P : Presenter<*>> : Fragment(), PresenterView<P>, MVPView 
             anyParentIsRemoving = parent.isRemoving
             parent = parent.parentFragment
         }
-        destroy(isRemoving || anyParentIsRemoving || activity.isFinishing)
+        delegate.destroy(isRemoving || anyParentIsRemoving || activity.isFinishing)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        saveState(outState)
+        delegate.saveState(outState)
     }
 
 }
