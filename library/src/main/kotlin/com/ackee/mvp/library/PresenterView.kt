@@ -1,6 +1,7 @@
 package com.ackee.mvp.library
 
 import android.os.Bundle
+import com.ackee.mvp.core.Presenter
 
 /**
  * TODO add class description

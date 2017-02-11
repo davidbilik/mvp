@@ -4,6 +4,8 @@ import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.View
+import com.ackee.mvp.core.MVPView
+import com.ackee.mvp.core.Presenter
 
 /**
  * TODO add class description
@@ -63,5 +65,7 @@ open class MVPFragment: Fragment(), MVPView {
         super.onSaveInstanceState(outState)
         delegate.saveState(outState)
     }
+
+    fun getPresenter() : Presenter<out Any> = delegate.getPresenter() as Presenter<out Any>
 
 }

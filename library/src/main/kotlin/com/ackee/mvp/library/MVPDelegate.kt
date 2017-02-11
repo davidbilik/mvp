@@ -1,6 +1,9 @@
 package com.ackee.mvp.library
 
 import android.os.Bundle
+import com.ackee.mvp.core.Presenter
+import com.ackee.mvp.core.PresenterBinder
+import com.ackee.mvp.core.PresenterManager
 
 /**
  * TODO add class description
@@ -37,15 +40,15 @@ class MVPDelegate<Delegated : Any>(var delegated: Delegated) {
     }
 
     fun viewResumed() {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        getPresenter().viewResumed()
     }
 
     fun viewPaused() {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        getPresenter().viewPaused()
     }
 
     fun viewDestroyed() {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        getPresenter().viewDestroyed()
     }
 
     fun destroy(terminal: Boolean) {
@@ -59,10 +62,15 @@ class MVPDelegate<Delegated : Any>(var delegated: Delegated) {
             presenter = PresenterManager.get(restoredState!!.getString(ID_KEY, null)) as Presenter<in Delegated>
         }
         if (presenter == null) {
-            presenter = createPresenter<Delegated, Presenter<Delegated>>(getClassFromAnnotation(delegated.javaClass.kotlin))
-            presenter?.create(if (restoredState == null) arguments else restoredState!!)
+            presenter = findPresenterBinder(delegated)?.createPresenter() as Presenter<in Delegated>?
+            presenter?.create()
         }
         return presenter!!
+    }
+
+
+    private fun findPresenterBinder(delegated: Delegated): PresenterBinder? {
+        return Class.forName("${delegated.javaClass.simpleName}PresenterBinder").newInstance() as PresenterBinder
     }
 
 

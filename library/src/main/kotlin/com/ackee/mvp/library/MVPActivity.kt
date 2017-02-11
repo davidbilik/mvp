@@ -2,6 +2,7 @@ package com.ackee.mvp.library
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import com.ackee.mvp.core.Presenter
 
 /**
  * Implementation of Activity with MVP.
@@ -9,7 +10,7 @@ import android.support.v7.app.AppCompatActivity
  * @author David Bilik [david.bilik@ackee.cz]
  * @since 12/11/16
  **/
-class MVPActivity : AppCompatActivity() {
+open class MVPActivity : AppCompatActivity() {
 
     companion object {
         val TAG: String = MVPFragment::class.java.name
@@ -48,4 +49,6 @@ class MVPActivity : AppCompatActivity() {
         super.onRestoreInstanceState(savedInstanceState)
         delegate.restoreState(savedInstanceState)
     }
+
+    fun getPresenter() : Presenter<*> = delegate.getPresenter()
 }
