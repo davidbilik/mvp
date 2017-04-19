@@ -1,19 +1,13 @@
 package com.ackee.mvp
 
-import android.util.Log
-import com.ackee.mvp.core.Presenter
+import com.ackee.mvp.library.Presenter
 
 /**
- * TODO add class description
-
+ * Presenter example.
+ *
  * @author David Bilik [david.bilik@ackee.cz]
  * @since 14/11/16
  **/
 class MyPresenter : Presenter<IMyView>() {
-    companion object {
-        val TAG: String = MyPresenter::class.java.name
-    }
-    fun loadData() {
-        Log.d(TAG, "loadData: ");
-    }
+
 }

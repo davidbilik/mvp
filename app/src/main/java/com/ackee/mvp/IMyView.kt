@@ -1,12 +1,12 @@
 package com.ackee.mvp
 
-import com.ackee.mvp.core.MVPView
+import com.ackee.mvp.library.MvpView
 
 /**
- * TODO add class description
-
+ * View Example
+ *
  * @author David Bilik [david.bilik@ackee.cz]
  * @since 14/11/16
  **/
-interface IMyView : MVPView{
+interface IMyView : MvpView {
 }

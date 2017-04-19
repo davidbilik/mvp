@@ -1,16 +1,14 @@
 apply plugin: 'com.android.application'
-
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'com.neenbedankt.android-apt'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "25.0.0"
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "com.ackee.mvp"
-        minSdkVersion 16
-        targetSdkVersion 24
+        minSdkVersion 19
+        targetSdkVersion 25
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -30,20 +28,9 @@ kapt {
     generateStubs = true
 }
 dependencies {
-//    compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':library')
-    kapt "com.ackee.mvplib:processor:0.1.3"
-    compile 'com.android.support:appcompat-v7:25.0.0'
+    compile project(':android-mvp-plugin')
+    compile 'com.android.support:appcompat-v7:25.3.1'
     testCompile 'junit:junit:4.12'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
-
-task processorTask(type: Copy) {
-    from('../processor/outputs/') {
-        include '**/*.jar'
-    }
-    into 'libs/'
-}
-
-processorTask.dependsOn(':processor:uploadArchives')
-preBuild.dependsOn(processorTask)
