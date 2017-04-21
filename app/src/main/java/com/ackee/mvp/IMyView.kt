@@ -9,4 +9,5 @@ import com.ackee.mvp.library.MvpView
  * @since 14/11/16
  **/
 interface IMyView : MvpView {
+    fun showText(text: String)
 }

@@ -19,7 +19,7 @@ import com.trello.rxlifecycle2.navi.NaviLifecycle
  * @author Georgiy Shur (georgiy.shur@ackee.cz)
  * @since 4/18/2017
  */
-class MvpActivityExtension<V: MvpView, A, P : Presenter<V>>(activity: A) where A : PresenterCreator<P>, A : NaviAppCompatActivity, A : MvpView {
+class MvpActivityExtension<V : MvpView, A, P : Presenter<V>>(activity: A) where A : PresenterCreator<P>, A : NaviAppCompatActivity, A : MvpView {
 
     lateinit var presenter: P
 
@@ -31,7 +31,7 @@ class MvpActivityExtension<V: MvpView, A, P : Presenter<V>>(activity: A) where A
 
         RxNavi.observe(activity, Event.SAVE_INSTANCE_STATE)
                 .bindToLifecycle(lifecycleProvider)
-                .subscribe({ /* TODO save presenter state to bundle */ }, { it.printStackTrace() })
+                .subscribe({ presenter.saveState(it) }, { it.printStackTrace() })
 
         RxNavi.observe(activity, Event.RESUME)
                 .bindToLifecycle(lifecycleProvider)

@@ -24,6 +24,13 @@ abstract class Presenter<V : MvpView>(bundle: Bundle? = null) {
     }
 
     /**
+     * Save presenter view state to [bundle]
+     */
+    open fun saveState(bundle: Bundle) {
+
+    }
+
+    /**
      * Attach view to presenter. Notify all observers that the view is attached.
      */
     fun attachView(view: V) {
@@ -79,8 +86,8 @@ abstract class Presenter<V : MvpView>(bundle: Bundle? = null) {
      * [onComplete] on view.
      */
     private fun <T> Observable<T>.deliverToViewInternal(onNext: (V.(item: T) -> Unit)? = null,
-                                                        onError: (V.(error: Throwable) -> Unit)? = null,
-                                                        onComplete: (V.() -> Unit)? = null): Disposable {
+            onError: (V.(error: Throwable) -> Unit)? = null,
+            onComplete: (V.() -> Unit)? = null): Disposable {
         return compose(DeliverToView<V, T>(viewSubject))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ it.split(onNext, onError, onComplete) })
@@ -91,7 +98,7 @@ abstract class Presenter<V : MvpView>(bundle: Bundle? = null) {
      * on view.
      */
     fun <T> Observable<T>.deliverToView(onNext: V.(item: T) -> Unit,
-                                        onError: (V.(error: Throwable) -> Unit)? = null): Disposable {
+            onError: (V.(error: Throwable) -> Unit)? = null): Disposable {
         return deliverToViewInternal(onNext, onError)
     }
 
@@ -100,7 +107,7 @@ abstract class Presenter<V : MvpView>(bundle: Bundle? = null) {
      * on view.
      */
     fun <T> Single<T>.deliverToView(onSuccess: V.(item: T) -> Unit,
-                                    onError: (V.(error: Throwable) -> Unit)? = null): Disposable {
+            onError: (V.(error: Throwable) -> Unit)? = null): Disposable {
         return toObservable().deliverToViewInternal(onSuccess, onError)
     }
 
@@ -109,7 +116,7 @@ abstract class Presenter<V : MvpView>(bundle: Bundle? = null) {
      * on view.
      */
     fun <T> Maybe<T>.deliverToView(onSuccess: V.(item: T) -> Unit,
-                                   onError: (V.(error: Throwable) -> Unit)? = null): Disposable {
+            onError: (V.(error: Throwable) -> Unit)? = null): Disposable {
         return toObservable().deliverToViewInternal(onSuccess, onError)
     }
 
@@ -117,7 +124,7 @@ abstract class Presenter<V : MvpView>(bundle: Bundle? = null) {
      * Deliver event from [Completable] to view when it is attached. Run [onComplete] and [onError].
      */
     fun Completable.deliverToView(onComplete: V.() -> Unit,
-                                  onError: (V.(error: Throwable) -> Unit)? = null): Disposable {
+            onError: (V.(error: Throwable) -> Unit)? = null): Disposable {
         return toObservable<Unit>().deliverToViewInternal(onError = onError, onComplete = onComplete)
     }
 }

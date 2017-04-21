@@ -10,7 +10,7 @@ android {
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
-
+        multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
     }
@@ -22,6 +22,9 @@ android {
     }
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
+    }
+    testOptions {
+        unitTests.returnDefaultValues = true
     }
 }
 
@@ -38,6 +41,13 @@ dependencies {
     compile 'com.trello.navi2:navi:2.0'
     compile 'com.trello.rxlifecycle2:rxlifecycle-kotlin:2.0.1'
     compile 'com.trello.rxlifecycle2:rxlifecycle-navi:2.0.1'
+
+    androidTestCompile 'junit:junit:4.12'
+    androidTestCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    androidTestCompile 'com.nhaarman:mockito-kotlin:1.4.0'
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
+    androidTestCompile 'com.android.support.test:runner:0.5'
+
 
     testCompile 'junit:junit:4.12'
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"

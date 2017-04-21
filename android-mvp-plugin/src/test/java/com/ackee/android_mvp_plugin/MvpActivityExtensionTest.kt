@@ -1,15 +1,16 @@
 package com.ackee.android_mvp_plugin
 
+import android.content.Context
 import android.os.Bundle
+import android.view.Window
 import com.ackee.mvp.library.MvpView
 import com.ackee.mvp.library.Presenter
 import com.ackee.mvp.library.PresenterCreator
-import com.nhaarman.mockito_kotlin.mock
 import com.trello.navi2.component.support.NaviAppCompatActivity
 
 import org.junit.Test
 
-import org.junit.Assert.*
+import org.mockito.Mockito
 
 /**
  * Test if the MVP extension works properly with test activity and presenter
@@ -20,29 +21,28 @@ import org.junit.Assert.*
  */
 class MvpActivityExtensionTest {
 
-    // TODO write tests for plugins
 
-//    @Test
-//    fun onCreate_called() {
-//        val mockPresenter = mock<TestPresenter>()
-//        val activity = TestActivity(mockPresenter)
-//        activity.testCreate()
-//        assertEquals(mockPresenter, activity.mvpExtension.presenter)
-//    }
-//
-//    private class TestActivity(val mockPresenter: TestPresenter) : NaviAppCompatActivity(), PresenterCreator<TestPresenter>, TestView {
-//        val mvpExtension = MvpActivityExtension(this)
-//
-//        override fun createPresenter(bundle: Bundle?): TestPresenter {
-//            return TestPresenter()
-//        }
-//
-//        fun testCreate() {
-//            onCreate(null)
-//        }
-//    }
-//
-//    private class TestPresenter : Presenter<TestView>()
-//
-//    private interface TestView : MvpView
+    @Test
+    fun onCreate_called() {
+        val mock = Mockito.spy(TestActivity::class.java)
+        Mockito.`when`(mock.window).thenReturn(Mockito.mock(Window::class.java))
+        val extension = MvpActivityExtension <TestView, TestActivity, TestPresenter>(mock)
+        mock.testCreate()
+    }
+
 }
+
+open class TestActivity : NaviAppCompatActivity(), PresenterCreator<TestPresenter>, MvpView {
+    override fun createPresenter(bundle: Bundle?): TestPresenter {
+        return TestPresenter()
+    }
+
+    fun testCreate() {
+        super.onCreate(null)
+    }
+
+}
+
+open class TestPresenter : Presenter<TestView>()
+
+interface TestView : MvpView
