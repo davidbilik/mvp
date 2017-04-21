@@ -55,3 +55,6 @@ dependencies {
 
     compile project(':library')
 }
+
+
+apply from: rootProject.file('gradle/gradle-mvn-push.gradle')

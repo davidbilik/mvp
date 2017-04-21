@@ -38,3 +38,6 @@ dependencies {
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testCompile "com.nhaarman:mockito-kotlin:1.4.0"
 }
+
+
+apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
