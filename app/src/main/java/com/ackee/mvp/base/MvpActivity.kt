@@ -14,4 +14,7 @@ import com.trello.navi2.component.support.NaviAppCompatActivity
  */
 abstract class MvpActivity<V : MvpView, P : Presenter<V>> : NaviAppCompatActivity(), PresenterCreator<P>, MvpView {
     val mvpExtension = MvpActivityExtension(this)
+
+    val presenter: P
+        get() = mvpExtension.presenter
 }

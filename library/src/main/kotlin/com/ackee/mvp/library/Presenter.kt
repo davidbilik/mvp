@@ -75,10 +75,15 @@ abstract class Presenter<V : MvpView>(bundle: Bundle? = null) {
      * Wait until the view will be attached and run some code on it.
      */
     fun onViewReady(onViewReady: V.() -> Unit): Disposable {
+        return viewIfExists()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ onViewReady.invoke(it!!) }, Throwable::printStackTrace)
+    }
+
+    private fun viewIfExists(): Observable<V> {
         return viewSubject.filter { it.view != null }
                 .take(1)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ onViewReady.invoke(it.view!!) }, Throwable::printStackTrace)
+                .map { it.view }
     }
 
     /**
@@ -88,9 +93,14 @@ abstract class Presenter<V : MvpView>(bundle: Bundle? = null) {
     private fun <T> Observable<T>.deliverToViewInternal(onNext: (V.(item: T) -> Unit)? = null,
             onError: (V.(error: Throwable) -> Unit)? = null,
             onComplete: (V.() -> Unit)? = null): Disposable {
-        return compose(DeliverToView<V, T>(viewSubject))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ it.split(onNext, onError, onComplete) })
+        return observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ data ->
+                    viewIfExists().subscribe { onNext?.invoke(it!!, data) }
+                }, { err ->
+                    viewIfExists().subscribe { onError?.invoke(it!!, err) }
+                }, {
+                    viewIfExists().subscribe { onComplete?.invoke(it!!) }
+                })
     }
 
     /**
