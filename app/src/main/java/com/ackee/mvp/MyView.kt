@@ -14,9 +14,9 @@ import com.ackee.mvp.base.MvpFragment
  * @author David Bilik [david.bilik@ackee.cz]
  * @since 14/11/16
  */
-class MyView : MvpActivity<IMyView, MyPresenter>(), IMyView {
-    override fun createPresenter(bundle: Bundle?): MyPresenter {
-        return MyPresenter(bundle)
+class MyView : MvpActivity<IMyView, MyPresenter, MyState>(), IMyView {
+    override fun createPresenter(state: MyState?): MyPresenter {
+        return MyPresenter(state)
     }
 
     lateinit var textView: TextView
