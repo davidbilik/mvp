@@ -1,6 +1,5 @@
 package com.ackee.mvp.library
 
-import android.os.Bundle
 import android.os.Parcelable
 import io.reactivex.*
 import io.reactivex.android.schedulers.AndroidSchedulers

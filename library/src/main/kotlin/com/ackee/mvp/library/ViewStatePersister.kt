@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.os.Parcelable
 
 /**
- * TODO add class description
+ * Persister that stores view state to bundle and vice versa
  *
  * @author David Bilik [david.bilik@ackee.cz]
  * @since 04/05/2017

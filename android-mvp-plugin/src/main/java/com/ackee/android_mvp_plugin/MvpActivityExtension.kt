@@ -1,6 +1,5 @@
 package com.ackee.android_mvp_plugin
 
-import android.os.Bundle
 import android.os.Parcelable
 import com.ackee.mvp.library.MvpView
 import com.ackee.mvp.library.Presenter
@@ -11,7 +10,6 @@ import com.trello.navi2.component.support.NaviAppCompatActivity
 import com.trello.navi2.rx.RxNavi
 import com.trello.rxlifecycle2.kotlin.bindToLifecycle
 import com.trello.rxlifecycle2.navi.NaviLifecycle
-import paperparcel.internal.Utils.init
 
 /**
  * Navi extension to which all the MVP logic is delegated from activity.
