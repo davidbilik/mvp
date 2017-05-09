@@ -1,6 +1,7 @@
 package com.ackee.android_mvp_plugin
 
-import android.os.Bundle
+import android.os.Parcelable
+import com.ackee.android_mvp_plugin.Constants.VIEW_STATE_KEY
 import com.ackee.mvp.library.MvpView
 import com.ackee.mvp.library.Presenter
 import com.ackee.mvp.library.PresenterCreator
@@ -19,7 +20,7 @@ import com.trello.rxlifecycle2.navi.NaviLifecycle
  * @author Georgiy Shur (georgiy.shur@ackee.cz)
  * @since 4/18/2017
  */
-class MvpActivityExtension<V : MvpView, A, P : Presenter<V>>(activity: A) where A : PresenterCreator<P>, A : NaviAppCompatActivity, A : MvpView {
+class MvpActivityExtension<V : MvpView, A, P : Presenter<V, T>, T : Parcelable>(activity: A) where A : PresenterCreator<P, T>, A : NaviAppCompatActivity, A : MvpView {
 
     lateinit var presenter: P
 
@@ -27,11 +28,16 @@ class MvpActivityExtension<V : MvpView, A, P : Presenter<V>>(activity: A) where 
         val lifecycleProvider = NaviLifecycle.createActivityLifecycleProvider(activity)
         RxNavi.observe(activity, Event.CREATE)
                 .bindToLifecycle(lifecycleProvider)
-                .subscribe({ presenter = activity.createPresenter(it ?: activity.intent.extras) }, { it.printStackTrace() })
+                .subscribe({ presenter = activity.createPresenter(it.getParcelable(VIEW_STATE_KEY)) }, { it.printStackTrace() })
 
         RxNavi.observe(activity, Event.SAVE_INSTANCE_STATE)
                 .bindToLifecycle(lifecycleProvider)
-                .subscribe({ presenter.saveState(it) }, { it.printStackTrace() })
+                .subscribe({
+                    val viewState = presenter.stateToSave()
+                    if (viewState != null) {
+                        it.putParcelable(VIEW_STATE_KEY, viewState)
+                    }
+                }, { it.printStackTrace() })
 
         RxNavi.observe(activity, Event.RESUME)
                 .bindToLifecycle(lifecycleProvider)

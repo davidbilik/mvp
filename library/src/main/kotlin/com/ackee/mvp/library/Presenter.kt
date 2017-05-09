@@ -1,6 +1,6 @@
 package com.ackee.mvp.library
 
-import android.os.Bundle
+import android.os.Parcelable
 import io.reactivex.*
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -13,7 +13,7 @@ import io.reactivex.subjects.BehaviorSubject
  * @author Georgiy Shur (georgiy.shur@ackee.cz)
  * @since 4/16/2017
  */
-abstract class Presenter<V : MvpView>(bundle: Bundle? = null) {
+abstract class Presenter<V : MvpView, out T : Parcelable>(val viewState: T? = null) {
 
     internal val viewSubject = BehaviorSubject.create<OptionalView<V>>()
     internal val disposables = CompositeDisposable()
@@ -24,10 +24,10 @@ abstract class Presenter<V : MvpView>(bundle: Bundle? = null) {
     }
 
     /**
-     * Save presenter view state to [bundle]
+     * Get presenter view state to restore
      */
-    open fun saveState(bundle: Bundle) {
-
+    open fun stateToSave(): T? {
+        return null
     }
 
     /**

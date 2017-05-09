@@ -1,5 +1,7 @@
 package com.ackee.mvp.library
 
+import android.os.Parcel
+import android.os.Parcelable
 import com.nhaarman.mockito_kotlin.mock
 import io.reactivex.*
 import org.junit.Test
@@ -249,7 +251,9 @@ class PresenterTest {
 
     private interface TestView : MvpView
 
-    private class TestPresenter : Presenter<TestView>() {
+
+
+    private class TestPresenter : Presenter<TestView, TestState>() {
         fun testObservable(testObservable: Observable<Unit>, onNext: TestView.(item: Unit) -> Unit,
                            onError: (TestView.(error: Throwable) -> Unit)? = null) {
             testObservable.deliverToView(onNext, onError)
@@ -269,5 +273,27 @@ class PresenterTest {
                             onError: (TestView.(error: Throwable) -> Unit)? = null) {
             testCompletable.deliverToView(onComplete, onError)
         }
+    }
+
+
+    class TestState : Parcelable {
+        companion object {
+            @JvmField val CREATOR = object : Parcelable.Creator<TestState> {
+                override fun newArray(size: Int): Array<TestState> {
+                    return arrayOf()
+                }
+
+                override fun createFromParcel(source: Parcel): TestState {
+                    return TestState()
+                }
+            }
+        }
+
+        override fun writeToParcel(dest: Parcel, flags: Int) {
+
+        }
+
+        override fun describeContents(): Int = 0
+
     }
 }

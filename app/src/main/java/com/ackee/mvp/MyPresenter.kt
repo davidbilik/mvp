@@ -1,10 +1,9 @@
 package com.ackee.mvp
 
-import android.os.Bundle
-import android.util.Log
+import android.os.Parcel
+import android.os.Parcelable
 import com.ackee.mvp.library.Presenter
-import io.reactivex.Observable
-import java.util.concurrent.TimeUnit
+
 
 /**
  * Presenter example.
@@ -12,28 +11,35 @@ import java.util.concurrent.TimeUnit
  * @author David Bilik [david.bilik@ackee.cz]
  * @since 14/11/16
  **/
-class MyPresenter(state: Bundle?) : Presenter<IMyView>(state) {
+class MyPresenter(state: MyState?) : Presenter<IMyView, MyState>(state) {
 
-    var value = 0L
 
     init {
         onViewReady {
-            showText("Hello world")
+            showText(state?.text ?: "Hello world")
         }
-        val offset = state?.getLong("offset") ?: 0
-        bind(Observable.interval(1, TimeUnit.SECONDS)
-                .subscribe {
-                    onViewReady {
-                        value = it
-                        showText("${offset + it}")
-                    }
-                }
-        )
     }
 
-    override fun saveState(bundle: Bundle) {
-        super.saveState(bundle)
-        bundle.putLong("offset", value)
+    override fun stateToSave(): MyState? = MyState("Stored save state")
+}
+
+data class MyState(val text: String) : Parcelable {
+    companion object {
+        @JvmField val CREATOR = object : Parcelable.Creator<MyState> {
+            override fun newArray(size: Int): Array<MyState> {
+                return arrayOf()
+            }
+
+            override fun createFromParcel(source: Parcel): MyState {
+                return MyState(source.readString())
+            }
+        }
     }
+
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeString(text)
+    }
+
+    override fun describeContents(): Int = 0
 
 }
