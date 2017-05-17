@@ -12,12 +12,12 @@ import kotlin.test.assertEquals
  * @author Georgiy Shur (georgiy.shur@ackee.cz)
  * @since 4/17/2017
  */
-class DeliverToViewTest {
+class DeliverToViewStickyTest {
 
     @Test
     fun deliver_to_view() {
         val view = mock<MvpView>()
-        val deliverToView = DeliverToView<MvpView, Unit>(Observable.just(OptionalView(view)))
+        val deliverToView = DeliverToViewSticky<MvpView, Unit>(Observable.just(OptionalView(view)))
         val testObserver = Observable.just(Unit).compose(deliverToView).test()
         assertEquals(1, testObserver.events[0].size)
         assertEquals(Delivery(view, Notification.createOnNext(Unit)), testObserver.events[0][0])

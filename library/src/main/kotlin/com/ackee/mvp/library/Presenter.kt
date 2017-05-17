@@ -86,21 +86,29 @@ abstract class Presenter<V : MvpView, out T : Parcelable>(val viewState: T? = nu
                 .map { it.view }
     }
 
+
     /**
-     * Deliver latest data from [Observable] to view when it is attached. Run [onNext], [onError] and
+     * Deliver emitted data from [Observable] to view once it is attached.  Run [onNext], [onError] and
      * [onComplete] on view.
      */
     private fun <T> Observable<T>.deliverToViewInternal(onNext: (V.(item: T) -> Unit)? = null,
             onError: (V.(error: Throwable) -> Unit)? = null,
-            onComplete: (V.() -> Unit)? = null): Disposable {
-        return observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ data ->
-                    viewIfExists().subscribe { onNext?.invoke(it!!, data) }
-                }, { err ->
-                    viewIfExists().subscribe { onError?.invoke(it!!, err) }
-                }, {
-                    viewIfExists().subscribe { onComplete?.invoke(it!!) }
-                })
+            onComplete: (V.() -> Unit)? = null, filterComplete: Boolean = true): Disposable {
+        return compose(DeliverToView<V, T>(viewSubject, filterComplete))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ it.split(onNext, onError, onComplete) })
+    }
+
+    /**
+     * Deliver latest emitted data from [Observable] to view every time it is attached. Run [onNext], [onError] and
+     * [onComplete] on view.
+     */
+    private fun <T> Observable<T>.deliverToViewStickyInternal(onNext: (V.(item: T) -> Unit)? = null,
+            onError: (V.(error: Throwable) -> Unit)? = null,
+            onComplete: (V.() -> Unit)? = null, filterComplete: Boolean = true): Disposable {
+        return compose(DeliverToViewSticky<V, T>(viewSubject, filterComplete))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ it.split(onNext, onError, onComplete) })
     }
 
     /**
@@ -113,15 +121,6 @@ abstract class Presenter<V : MvpView, out T : Parcelable>(val viewState: T? = nu
     }
 
     /**
-     * Deliver latest data from [Single] to view when it is attached. Run [onSuccess] and [onError]
-     * on view.
-     */
-    fun <T> Single<T>.deliverToView(onSuccess: V.(item: T) -> Unit,
-            onError: (V.(error: Throwable) -> Unit)? = null): Disposable {
-        return toObservable().deliverToViewInternal(onSuccess, onError)
-    }
-
-    /**
      * Deliver latest data from [Maybe] to view when it is attached. Run [onSuccess] and [onError]
      * on view.
      */
@@ -131,10 +130,54 @@ abstract class Presenter<V : MvpView, out T : Parcelable>(val viewState: T? = nu
     }
 
     /**
+     * Deliver latest data from [Single] to view when it is attached. Run [onSuccess] and [onError]
+     * on view.
+     */
+    fun <T> Single<T>.deliverToView(onSuccess: V.(item: T) -> Unit,
+            onError: (V.(error: Throwable) -> Unit)? = null): Disposable {
+        return toObservable().deliverToView(onSuccess, onError)
+    }
+
+    /**
      * Deliver event from [Completable] to view when it is attached. Run [onComplete] and [onError].
      */
     fun Completable.deliverToView(onComplete: V.() -> Unit,
             onError: (V.(error: Throwable) -> Unit)? = null): Disposable {
-        return toObservable<Unit>().deliverToViewInternal(onError = onError, onComplete = onComplete)
+        return toObservable<Unit>().deliverToViewInternal(onError = onError, onComplete = onComplete, filterComplete = false)
+    }
+
+    /**
+     * Deliver latest data from [Observable] to view when it is attached. Run [onNext] and [onError]
+     * on view.
+     */
+    fun <T> Observable<T>.deliverToViewSticky(onNext: V.(item: T) -> Unit,
+            onError: (V.(error: Throwable) -> Unit)? = null): Disposable {
+        return deliverToViewStickyInternal(onNext, onError)
+    }
+
+    /**
+     * Deliver latest data from [Single] to view when it is attached. Run [onSuccess] and [onError]
+     * on view.
+     */
+    fun <T> Single<T>.deliverToViewSticky(onSuccess: V.(item: T) -> Unit,
+            onError: (V.(error: Throwable) -> Unit)? = null): Disposable {
+        return toObservable().deliverToViewStickyInternal(onSuccess, onError)
+    }
+
+    /**
+     * Deliver latest data from [Maybe] to view when it is attached. Run [onSuccess] and [onError]
+     * on view.
+     */
+    fun <T> Maybe<T>.deliverToViewSticky(onSuccess: V.(item: T) -> Unit,
+            onError: (V.(error: Throwable) -> Unit)? = null): Disposable {
+        return toObservable().deliverToViewStickyInternal(onSuccess, onError)
+    }
+
+    /**
+     * Deliver event from [Completable] to view when it is attached. Run [onComplete] and [onError].
+     */
+    fun Completable.deliverToViewSticky(onComplete: V.() -> Unit,
+            onError: (V.(error: Throwable) -> Unit)? = null): Disposable {
+        return toObservable<Unit>().deliverToViewStickyInternal(onError = onError, onComplete = onComplete, filterComplete = false)
     }
 }

@@ -4,6 +4,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.nhaarman.mockito_kotlin.mock
 import io.reactivex.*
+import io.reactivex.subjects.PublishSubject
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -106,7 +107,7 @@ class PresenterTest {
         val view = mock<TestView>()
         presenter.attachView(view)
         var asserter = false
-        presenter.testObservable(Observable.just(Unit), { asserter = true })
+        presenter.testObservableSticky(Observable.just(Unit), { asserter = true })
         assertTrue(asserter)
     }
 
@@ -114,7 +115,7 @@ class PresenterTest {
     fun observable_deliver_to_view_onNext_attached_after_call() {
         val view = mock<TestView>()
         var asserter = false
-        presenter.testObservable(Observable.just(Unit), { asserter = true })
+        presenter.testObservableSticky(Observable.just(Unit), { asserter = true })
         presenter.attachView(view)
         assertTrue(asserter)
     }
@@ -124,7 +125,7 @@ class PresenterTest {
         val view = mock<TestView>()
         presenter.attachView(view)
         var asserter = false
-        presenter.testObservable(Observable.fromCallable { throw Exception() }, { }, { asserter = true })
+        presenter.testObservableSticky(Observable.fromCallable { throw Exception() }, { }, { asserter = true })
         assertTrue(asserter)
     }
 
@@ -134,7 +135,7 @@ class PresenterTest {
         presenter.attachView(view)
         presenter.detachView()
         var asserter = false
-        presenter.testObservable(Observable.just(Unit), { asserter = true })
+        presenter.testObservableSticky(Observable.just(Unit), { asserter = true })
         assertFalse(asserter)
     }
 
@@ -143,7 +144,7 @@ class PresenterTest {
         val view = mock<TestView>()
         presenter.attachView(view)
         var asserter = false
-        presenter.testSingle(Single.just(Unit), { asserter = true })
+        presenter.testSingleSticky(Single.just(Unit), { asserter = true })
         assertTrue(asserter)
     }
 
@@ -151,7 +152,7 @@ class PresenterTest {
     fun single_deliver_to_view_onSuccess_attached_after_call() {
         val view = mock<TestView>()
         var asserter = false
-        presenter.testSingle(Single.just(Unit), { asserter = true })
+        presenter.testSingleSticky(Single.just(Unit), { asserter = true })
         presenter.attachView(view)
         assertTrue(asserter)
     }
@@ -161,7 +162,7 @@ class PresenterTest {
         val view = mock<TestView>()
         presenter.attachView(view)
         var asserter = false
-        presenter.testSingle(Single.fromCallable { throw Exception() }, { }, { asserter = true })
+        presenter.testSingleSticky(Single.fromCallable { throw Exception() }, { }, { asserter = true })
         assertTrue(asserter)
     }
 
@@ -171,7 +172,7 @@ class PresenterTest {
         presenter.attachView(view)
         presenter.detachView()
         var asserter = false
-        presenter.testSingle(Single.just(Unit), { asserter = true })
+        presenter.testSingleSticky(Single.just(Unit), { asserter = true })
         assertFalse(asserter)
     }
 
@@ -180,7 +181,7 @@ class PresenterTest {
         val view = mock<TestView>()
         presenter.attachView(view)
         var asserter = false
-        presenter.testMaybe(Maybe.just(Unit), { asserter = true })
+        presenter.testMaybeSticky(Maybe.just(Unit), { asserter = true })
         assertTrue(asserter)
     }
 
@@ -188,7 +189,7 @@ class PresenterTest {
     fun maybe_deliver_to_view_onSuccess_attached_after_call() {
         val view = mock<TestView>()
         var asserter = false
-        presenter.testMaybe(Maybe.just(Unit), { asserter = true })
+        presenter.testMaybeSticky(Maybe.just(Unit), { asserter = true })
         presenter.attachView(view)
         assertTrue(asserter)
     }
@@ -198,7 +199,7 @@ class PresenterTest {
         val view = mock<TestView>()
         presenter.attachView(view)
         var asserter = false
-        presenter.testMaybe(Maybe.fromCallable { throw Exception() }, { }, { asserter = true })
+        presenter.testMaybeSticky(Maybe.fromCallable { throw Exception() }, { }, { asserter = true })
         assertTrue(asserter)
     }
 
@@ -208,7 +209,7 @@ class PresenterTest {
         presenter.attachView(view)
         presenter.detachView()
         var asserter = false
-        presenter.testMaybe(Maybe.just(Unit), { asserter = true })
+        presenter.testMaybeSticky(Maybe.just(Unit), { asserter = true })
         assertFalse(asserter)
     }
 
@@ -217,7 +218,7 @@ class PresenterTest {
         val view = mock<TestView>()
         presenter.attachView(view)
         var asserter = false
-        presenter.testCompletable(Completable.complete(), { asserter = true })
+        presenter.testCompletableSticky(Completable.complete(), { asserter = true })
         assertTrue(asserter)
     }
 
@@ -225,7 +226,7 @@ class PresenterTest {
     fun completable_deliver_to_view_onComplete_attached_after_call() {
         val view = mock<TestView>()
         var asserter = false
-        presenter.testCompletable(Completable.complete(), { asserter = true })
+        presenter.testCompletableSticky(Completable.complete(), { asserter = true })
         presenter.attachView(view)
         assertTrue(asserter)
     }
@@ -235,7 +236,7 @@ class PresenterTest {
         val view = mock<TestView>()
         presenter.attachView(view)
         var asserter = false
-        presenter.testCompletable(Completable.fromCallable { throw Exception() }, { }, { asserter = true })
+        presenter.testCompletableSticky(Completable.fromCallable { throw Exception() }, { }, { asserter = true })
         assertTrue(asserter)
     }
 
@@ -245,33 +246,101 @@ class PresenterTest {
         presenter.attachView(view)
         presenter.detachView()
         var asserter = false
-        presenter.testCompletable(Completable.complete(), { asserter = true })
+        presenter.testCompletableSticky(Completable.complete(), { asserter = true })
         assertFalse(asserter)
     }
+
+
+    @Test
+    fun deliver_again_after_reattach() {
+        val view = mock<TestView>()
+        var counter = 0
+        presenter.testObservableSticky(Observable.just(Unit), { counter += 1 })
+        presenter.attachView(view)
+        assertEquals(1, counter)
+        presenter.detachView()
+        presenter.attachView(view)
+        assertEquals(2, counter)
+    }
+
+    @Test
+    fun deliver_new_value_to_view() {
+        val view = mock<TestView>()
+        var counter = 0
+        val testSubject = PublishSubject.create<Int>()
+        presenter.testObservableSticky(testSubject, { counter += 1 })
+        presenter.attachView(view)
+        testSubject.onNext(0)
+        assertEquals(1, counter)
+        testSubject.onNext(1)
+        assertEquals(2, counter)
+    }
+
+    @Test
+    fun not_deliver_again_when_reattach_deliverToView() {
+        val view = mock<TestView>()
+        var counter = 0
+        presenter.testObservableNotSticky(Observable.just(Unit), { counter += 1 })
+        presenter.attachView(view)
+        presenter.detachView()
+        presenter.attachView(view)
+        assertEquals(1, counter)
+    }
+
+
+    @Test
+    fun deliver_again_when_new_value_deliverToView() {
+        val view = mock<TestView>()
+        var counter = 0
+        val testSubject = PublishSubject.create<Int>()
+        presenter.testObservableNotSticky(testSubject, { counter += 1 })
+        presenter.attachView(view)
+        testSubject.onNext(1)
+        assertEquals(1, counter)
+        testSubject.onNext(1)
+        assertEquals(2, counter)
+    }
+
+
+    @Test
+    fun deliver_when_value_emitted_before_attach_deliverToView() {
+        val view = mock<TestView>()
+        var counter = 0
+        val testSubject = PublishSubject.create<Int>()
+        presenter.testObservableNotSticky(testSubject, { counter += 1 })
+        testSubject.onNext(1)
+        presenter.attachView(view)
+        assertEquals(1, counter)
+    }
+
 
     private interface TestView : MvpView
 
 
-
     private class TestPresenter : Presenter<TestView, TestState>() {
-        fun testObservable(testObservable: Observable<Unit>, onNext: TestView.(item: Unit) -> Unit,
-                           onError: (TestView.(error: Throwable) -> Unit)? = null) {
+        fun testObservableSticky(testObservable: Observable<*>, onNext: TestView.(item: Any) -> Unit,
+                onError: (TestView.(error: Throwable) -> Unit)? = null) {
+            testObservable.deliverToViewSticky(onNext, onError)
+        }
+
+        fun testSingleSticky(testSingle: Single<Unit>, onSuccess: TestView.(item: Unit) -> Unit,
+                onError: (TestView.(error: Throwable) -> Unit)? = null) {
+            testSingle.deliverToViewSticky(onSuccess, onError)
+        }
+
+        fun testMaybeSticky(testMaybe: Maybe<Unit>, onSuccess: TestView.(item: Unit) -> Unit,
+                onError: (TestView.(error: Throwable) -> Unit)? = null) {
+            testMaybe.deliverToViewSticky(onSuccess, onError)
+        }
+
+        fun testCompletableSticky(testCompletable: Completable, onComplete: TestView.() -> Unit,
+                onError: (TestView.(error: Throwable) -> Unit)? = null) {
+            testCompletable.deliverToViewSticky(onComplete, onError)
+        }
+
+        fun testObservableNotSticky(testObservable: Observable<*>, onNext: TestView.(item: Any) -> Unit,
+                onError: (TestView.(error: Throwable) -> Unit)? = null) {
             testObservable.deliverToView(onNext, onError)
-        }
-
-        fun testSingle(testSingle: Single<Unit>, onSuccess: TestView.(item: Unit) -> Unit,
-                       onError: (TestView.(error: Throwable) -> Unit)? = null) {
-            testSingle.deliverToView(onSuccess, onError)
-        }
-
-        fun testMaybe(testMaybe: Maybe<Unit>, onSuccess: TestView.(item: Unit) -> Unit,
-                      onError: (TestView.(error: Throwable) -> Unit)? = null) {
-            testMaybe.deliverToView(onSuccess, onError)
-        }
-
-        fun testCompletable(testCompletable: Completable, onComplete: TestView.() -> Unit,
-                            onError: (TestView.(error: Throwable) -> Unit)? = null) {
-            testCompletable.deliverToView(onComplete, onError)
         }
     }
 
