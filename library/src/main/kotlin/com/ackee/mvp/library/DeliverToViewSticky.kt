@@ -23,8 +23,9 @@ internal class DeliverToViewSticky<V : MvpView, T>(private val view: Observable<
                         observable
                                 .materialize()
                                 .filter { notification -> !(notification.isOnComplete && filterOnComplete) },
-                        BiFunction<OptionalView<V>, Notification<T>, Array<Any>> { view, notification -> arrayOf(view, notification) })
-                .concatMap({ pack -> Delivery.validObservable(pack[0] as OptionalView<V>, pack[1] as Notification<T>) })
+                        BiFunction<OptionalView<V>, Notification<T>, Pair<OptionalView<V>, Notification<T>>> { view, notification -> Pair(view, notification) })
+                .filter { it.first.view != null }
+                .map { Delivery(it.first.view!!, it.second) }
 
     }
 }

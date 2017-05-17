@@ -17,17 +17,16 @@ import io.reactivex.functions.BiFunction
 internal class DeliverToView<V : MvpView, T>(private val view: Observable<OptionalView<V>>, val filterOnComplete: Boolean = true) : ObservableTransformer<T, Delivery<V, T>> {
 
     override fun apply(observable: Observable<T>): ObservableSource<Delivery<V, T>> {
-        return Observable
-                .combineLatest(
-                        view
-                                .filter { it.view != null }
-                                .take(1)
-                        ,
-                        observable
-                                .materialize()
-                                .filter { notification -> !(notification.isOnComplete && filterOnComplete) },
-                        BiFunction<OptionalView<V>, Notification<T>, Array<Any>> { view, notification -> arrayOf(view, notification) })
-                .concatMap({ pack -> Delivery.validObservable(pack[0] as OptionalView<V>, pack[1] as Notification<T>) })
+        return observable
+                .materialize()
+                .filter { notification -> !(notification.isOnComplete && filterOnComplete) }
+                .flatMap { notification ->
+                    view
+                            .filter { it.view != null }
+                            .take(1)
+                            .map { Delivery(it.view!!, notification) }
+                }
+
 
     }
 }

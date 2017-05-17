@@ -313,6 +313,20 @@ class PresenterTest {
         assertEquals(1, counter)
     }
 
+    @Test
+    fun not_deliver_when_view_detached_deliverToView() {
+        val view = mock<TestView>()
+        var counter = 0
+        val testSubject = PublishSubject.create<Int>()
+        presenter.testObservableNotSticky(testSubject, { counter += 1 })
+        presenter.attachView(view)
+        testSubject.onNext(1)
+        assertEquals(1, counter)
+        presenter.detachView()
+        testSubject.onNext(2)
+        assertEquals(1, counter)
+    }
+
 
     private interface TestView : MvpView
 
