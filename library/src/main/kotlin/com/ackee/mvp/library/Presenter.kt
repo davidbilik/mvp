@@ -71,6 +71,7 @@ abstract class Presenter<V : MvpView, out T : Parcelable>(val viewState: T? = nu
         viewDisposables.add(disposable)
     }
 
+
     /**
      * Wait until the view will be attached and run some code on it.
      */
@@ -78,6 +79,15 @@ abstract class Presenter<V : MvpView, out T : Parcelable>(val viewState: T? = nu
         return viewIfExists()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ onViewReady.invoke(it!!) }, Throwable::printStackTrace)
+    }
+
+    /**
+     * Call [onViewReady] function whenever view is ready
+     */
+    fun onViewReadySticky(onViewReady: V.() -> Unit) {
+        bind(viewSubject.filter { it.view != null }
+                .map { it.view }
+                .subscribe({ onViewReady(it!!) }, Throwable::printStackTrace))
     }
 
     private fun viewIfExists(): Observable<V> {

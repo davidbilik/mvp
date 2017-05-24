@@ -327,6 +327,18 @@ class PresenterTest {
         assertEquals(1, counter)
     }
 
+    @Test
+    fun should_perform_operation_everytime_view_is_attached() {
+        val view = mock<TestView>()
+        var counter = 0
+        presenter.testOnViewReadySticky { counter++ }
+        assertEquals(0, counter)
+        presenter.attachView(view)
+        assertEquals(1, counter)
+        presenter.detachView()
+        presenter.attachView(view)
+        assertEquals(2, counter)
+    }
 
     private interface TestView : MvpView
 
@@ -355,6 +367,10 @@ class PresenterTest {
         fun testObservableNotSticky(testObservable: Observable<*>, onNext: TestView.(item: Any) -> Unit,
                 onError: (TestView.(error: Throwable) -> Unit)? = null) {
             testObservable.deliverToView(onNext, onError)
+        }
+
+        fun testOnViewReadySticky(onNext: TestView.() -> Unit) {
+            onViewReadySticky { onNext() }
         }
     }
 
