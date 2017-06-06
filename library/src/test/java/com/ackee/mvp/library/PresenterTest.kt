@@ -340,8 +340,39 @@ class PresenterTest {
         assertEquals(2, counter)
     }
 
-    private interface TestView : MvpView
+    @Test
+    fun should_bind_to_observable_everytime_view_is_attached_and_unbind_when_view_is_detached() {
+        val clickSubject = PublishSubject.create<Unit>()
+        var disposeCounter = 0
+        var subscribeCounter = 0
+        val view = object : ObservableView {
+            override fun buttonClicks() = clickSubject
+                    .doOnSubscribe {
+                        subscribeCounter++
+                    }
+                    .doOnDispose {
+                        disposeCounter++
+                    }
+        }
+        val presenter = ObservablePresenter()
+        var actionCounter = 0
+        presenter.testOnViewReadyStickyWithBindToView {
+            actionCounter++
+        }
 
+        presenter.attachView(view)
+        clickSubject.onNext(Unit)
+        presenter.detachView()
+        presenter.attachView(view)
+        clickSubject.onNext(Unit)
+        presenter.detachView()
+
+        assertEquals(2, disposeCounter)
+        assertEquals(2, subscribeCounter)
+        assertEquals(2, actionCounter)
+    }
+
+    private interface TestView : MvpView
 
     private class TestPresenter : Presenter<TestView, TestState>() {
         fun testObservableSticky(testObservable: Observable<*>, onNext: TestView.(item: Any) -> Unit,
@@ -394,5 +425,22 @@ class PresenterTest {
 
         override fun describeContents(): Int = 0
 
+    }
+
+    private interface ObservableView : MvpView {
+        fun buttonClicks(): Observable<Unit>
+    }
+
+    private class ObservablePresenter : Presenter<ObservableView, TestState>() {
+        fun testOnViewReadyStickyWithBindToView(action: () -> Unit) {
+            onViewReadySticky {
+                bindToView(
+                        buttonClicks()
+                                .subscribe({
+                                    action()
+                                })
+                )
+            }
+        }
     }
 }
