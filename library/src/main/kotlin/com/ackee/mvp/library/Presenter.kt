@@ -17,7 +17,7 @@ abstract class Presenter<V : MvpView, out T : Parcelable>(val viewState: T? = nu
 
     internal val viewSubject = BehaviorSubject.create<OptionalView<V>>()
     internal val disposables = CompositeDisposable()
-    internal val viewDisposables = CompositeDisposable()
+    internal var viewDisposables = CompositeDisposable()
 
     init {
         // TODO create ViewState from bundle
@@ -34,6 +34,12 @@ abstract class Presenter<V : MvpView, out T : Parcelable>(val viewState: T? = nu
      * Attach view to presenter. Notify all observers that the view is attached.
      */
     fun attachView(view: V) {
+        /**
+         * View disposable needs to be created every time view is attached because if dispose() is called
+         * in detachView, we cannot add new disposables to its array. Its internal state is DISPOSED and it
+         * immediately dispose new disposables
+         */
+        viewDisposables = CompositeDisposable()
         viewSubject.onNext(OptionalView(view))
     }
 
@@ -71,6 +77,7 @@ abstract class Presenter<V : MvpView, out T : Parcelable>(val viewState: T? = nu
         viewDisposables.add(disposable)
     }
 
+
     /**
      * Wait until the view will be attached and run some code on it.
      */
@@ -78,6 +85,15 @@ abstract class Presenter<V : MvpView, out T : Parcelable>(val viewState: T? = nu
         return viewIfExists()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ onViewReady.invoke(it!!) }, Throwable::printStackTrace)
+    }
+
+    /**
+     * Call [onViewReady] function whenever view is ready
+     */
+    fun onViewReadySticky(onViewReady: V.() -> Unit) {
+        viewSubject.filter { it.view != null }
+                .map { it.view }
+                .subscribe({ onViewReady(it!!) }, Throwable::printStackTrace)
     }
 
     private fun viewIfExists(): Observable<V> {
