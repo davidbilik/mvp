@@ -1,7 +1,10 @@
 package com.ackee.mvp.library
 
 import android.os.Parcelable
-import io.reactivex.*
+import io.reactivex.Completable
+import io.reactivex.Maybe
+import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
@@ -17,7 +20,7 @@ abstract class Presenter<V : MvpView, out T : Parcelable>(val viewState: T? = nu
 
     internal val viewSubject = BehaviorSubject.create<OptionalView<V>>()
     internal val disposables = CompositeDisposable()
-    internal val viewDisposables = CompositeDisposable()
+    internal var viewDisposables = CompositeDisposable()
 
     init {
         // TODO create ViewState from bundle
@@ -34,6 +37,12 @@ abstract class Presenter<V : MvpView, out T : Parcelable>(val viewState: T? = nu
      * Attach view to presenter. Notify all observers that the view is attached.
      */
     fun attachView(view: V) {
+        /**
+         * View disposable needs to be created every time view is attached because if dispose() is called
+         * in detachView, we cannot add new disposables to its array. Its internal state is DISPOSED and it
+         * immediately dispose new disposables
+         */
+        viewDisposables = CompositeDisposable()
         viewSubject.onNext(OptionalView(view))
     }
 
@@ -85,9 +94,10 @@ abstract class Presenter<V : MvpView, out T : Parcelable>(val viewState: T? = nu
      * Call [onViewReady] function whenever view is ready
      */
     fun onViewReadySticky(onViewReady: V.() -> Unit) {
-        bind(viewSubject.filter { it.view != null }
+        viewSubject.filter { it.view != null }
                 .map { it.view }
-                .subscribe({ onViewReady(it!!) }, Throwable::printStackTrace))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ onViewReady(it!!) }, Throwable::printStackTrace)
     }
 
     private fun viewIfExists(): Observable<V> {
