@@ -16,15 +16,11 @@ import io.reactivex.subjects.BehaviorSubject
  * @author Georgiy Shur (georgiy.shur@ackee.cz)
  * @since 4/16/2017
  */
-abstract class Presenter<V : MvpView, out T : Parcelable>(val viewState: T? = null) {
+abstract class Presenter<V : MvpView, out T : Parcelable> {
 
     internal val viewSubject = BehaviorSubject.create<OptionalView<V>>()
     internal val disposables = CompositeDisposable()
     internal var viewDisposables = CompositeDisposable()
-
-    init {
-        // TODO create ViewState from bundle
-    }
 
     /**
      * Get presenter view state to restore
@@ -95,15 +91,15 @@ abstract class Presenter<V : MvpView, out T : Parcelable>(val viewState: T? = nu
      */
     fun onViewReadySticky(onViewReady: V.() -> Unit) {
         viewSubject.filter { it.view != null }
-                .map { it.view }
+                .map { it.view!! }
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ onViewReady(it!!) }, Throwable::printStackTrace)
+                .subscribe({ onViewReady(it) }, Throwable::printStackTrace)
     }
 
     private fun viewIfExists(): Observable<V> {
         return viewSubject.filter { it.view != null }
                 .take(1)
-                .map { it.view }
+                .map { it.view!! }
     }
 
 

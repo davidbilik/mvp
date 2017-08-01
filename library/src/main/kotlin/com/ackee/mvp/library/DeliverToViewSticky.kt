@@ -6,7 +6,6 @@ import io.reactivex.ObservableSource
 import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
 
-
 /**
  * Transformer that converts our observable to observable that emits "deliveries" that are containers
  * with data and view, when the view is ready (attached to presenter)
@@ -26,6 +25,5 @@ internal class DeliverToViewSticky<V : MvpView, T>(private val view: Observable<
                         BiFunction<OptionalView<V>, Notification<T>, Pair<OptionalView<V>, Notification<T>>> { view, notification -> Pair(view, notification) })
                 .filter { it.first.view != null }
                 .map { Delivery(it.first.view!!, it.second) }
-
     }
 }
