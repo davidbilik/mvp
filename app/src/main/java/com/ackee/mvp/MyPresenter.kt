@@ -11,7 +11,7 @@ import com.ackee.mvp.library.Presenter
  * @author David Bilik [david.bilik@ackee.cz]
  * @since 14/11/16
  **/
-class MyPresenter(state: MyState?) : Presenter<IMyView, MyState>(state) {
+class MyPresenter(state: MyState?) : Presenter<IMyView, MyState>() {
 
 
     init {
