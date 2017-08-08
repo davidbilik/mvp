@@ -83,7 +83,7 @@ abstract class Presenter<V : MvpView, out T : Parcelable> {
     fun onViewReady(onViewReady: V.() -> Unit): Disposable {
         return viewIfExists()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ onViewReady.invoke(it!!) }, Throwable::printStackTrace)
+                .subscribe({ onViewReady(it) }, Throwable::printStackTrace)
     }
 
     /**
