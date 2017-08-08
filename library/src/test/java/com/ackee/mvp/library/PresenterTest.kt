@@ -287,7 +287,6 @@ class PresenterTest {
         assertEquals(1, counter)
     }
 
-
     @Test
     fun deliver_again_when_new_value_deliverToView() {
         val view = mock<TestView>()
@@ -309,6 +308,19 @@ class PresenterTest {
         val testSubject = PublishSubject.create<Int>()
         presenter.testObservableNotSticky(testSubject, { counter += 1 })
         testSubject.onNext(1)
+        presenter.attachView(view)
+        assertEquals(1, counter)
+    }
+
+    @Test
+    fun deliver_only_last_value_deliverToView() {
+        val view = mock<TestView>()
+        var counter = 0
+        val testSubject = PublishSubject.create<Int>()
+        presenter.testObservableNotSticky(testSubject, { counter += 1 })
+        testSubject.onNext(1)
+        testSubject.onNext(2)
+        testSubject.onNext(3)
         presenter.attachView(view)
         assertEquals(1, counter)
     }
