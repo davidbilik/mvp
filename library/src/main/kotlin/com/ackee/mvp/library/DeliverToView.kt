@@ -1,11 +1,8 @@
 package com.ackee.mvp.library
 
-import io.reactivex.Notification
 import io.reactivex.Observable
 import io.reactivex.ObservableSource
 import io.reactivex.ObservableTransformer
-import io.reactivex.functions.BiFunction
-
 
 /**
  * Transformer that converts our observable to observable that emits "deliveries" that are containers
@@ -26,7 +23,5 @@ internal class DeliverToView<V : MvpView, T>(private val view: Observable<Option
                             .take(1)
                             .map { Delivery(it.view!!, notification) }
                 }
-
-
     }
 }
