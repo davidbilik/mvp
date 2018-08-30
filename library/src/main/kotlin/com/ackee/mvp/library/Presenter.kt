@@ -55,7 +55,7 @@ abstract class Presenter<V : MvpView, out T : Parcelable> {
      * Called from view when it is completely destroyed and presenter is no longer needed. Clean all
      * the mess: dispose of all bound disposables, complete view subject.
      */
-    fun onDestroy() {
+    open fun onDestroy() {
         viewSubject.onComplete()
         disposables.dispose()
     }
